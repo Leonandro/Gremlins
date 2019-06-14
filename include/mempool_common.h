@@ -8,7 +8,7 @@ typedef unsigned long int size_t;
 class StoragePool {
 
     public:
-        virtual ~ StoragePool ();
+        virtual ~StoragePool ();
         virtual void * Allocate ( size_t ) = 0;
         virtual void Free ( void * ) = 0;
         virtual void Release( void *) = 0;

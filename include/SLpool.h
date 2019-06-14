@@ -1,3 +1,4 @@
+#include <new>
 #include "mempool_common.h"
 #include <cmath>
 
@@ -22,26 +23,39 @@ class SLPool : public StoragePool {
         Block &m_sentinel; // ! < End of the list .
 
     public:
-        explicit SLPool( size_t bytes )
+        explicit SLPool( size_t bytes ) : m_n_blocks {(size_t)ceil( (bytes) / BLK_SIZE)}, m_pool {new Block[m_n_blocks+1]}
+										, m_sentinel{m_pool[m_n_blocks+1]}, StoragePool()
         {
-            int result = ceil(bytes/BLK_SIZE);
-            m_pool = new Block [result + 1];
-            m_sentinel = m_pool[0];
-        }
-        ~ SLPool ()
+           m_sentinel.m_length = 0;
+		   m_sentinel.m_next = &m_pool[0];
+		   m_pool[0].m_next = nullptr;
+		   m_pool[0].m_length = m_n_blocks;
+		}
+		virtual ~SLPool ()
         {
-            int a = 0;
+			delete [] m_pool;
         }
-        void * Allocate ( size_t bytes)
+		virtual void * Allocate ( size_t bytes)
         {
-            int a = 0;
+			size_t q_blocks = (bytes+ sizeof(Header))/BLK_SIZE;
+			Block *it = &m_sentinel;
+			int cont = 0;
+			while (it->m_next->m_length <= q_blocks and it->m_next!=nullptr) 
+				it = it->m_next;
+			if (it->m_next == nullptr) throw std::bad_alloc();
+			Block* to_return = it->m_next;
+			size_t nextlength = to_return->m_length - q_blocks;
+			it->m_next = it->m_next + nextlength;
+			to_return->m_length = q_blocks;
+
+			return to_return;	
         }
-        void Free ( void * )
+        virtual void Free ( void * )
         {
             int a = 0;
         }
 
-        void Release( void * )
+        virtual void Release( void * )
         {
             int a = 0;
         }
