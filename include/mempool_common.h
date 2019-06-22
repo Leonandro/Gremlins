@@ -8,10 +8,9 @@ typedef unsigned long int size_t;
 class StoragePool {
 
     public:
-        virtual ~StoragePool ();
+        virtual ~StoragePool () {/*Empty */}
         virtual void * Allocate ( size_t ) = 0;
         virtual void Free ( void * ) = 0;
-        virtual void Release( void *) = 0;
         
 };
 
@@ -39,7 +38,7 @@ void operator delete ( void * arg ) noexcept {
 // The pool id ( tag ) is located ‘ sizeof ( Tag ) ’ bytes before .
     Tag * const tag = reinterpret_cast < Tag * >( arg ) - 1U ;
     if( nullptr != tag->pool ) // Memory block belongs to a particular GM .
-        tag->pool->Release( tag );
+        tag->pool->Free( tag );
     else
         std::free( tag ); // Memory block belongs to the operational system .
 }
