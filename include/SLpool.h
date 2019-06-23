@@ -34,7 +34,7 @@ class SLPool : public StoragePool {
         Block & m_sentinel; // ! < End of the list .
 
     public:
-        explicit SLPool( size_t bytes ) : m_n_blocks { (size_t)ceil( ( (double)bytes + sizeof(Header) ) / (double)BLK_SIZE)}, m_pool {new Block[m_n_blocks+1]}
+        SLPool( size_t bytes ) : m_n_blocks { (size_t)ceil( ( (double)bytes + sizeof(Header) ) / (double)BLK_SIZE)}, m_pool {new Block[m_n_blocks+1]}
 										, m_sentinel{m_pool[m_n_blocks]}, StoragePool()
         {
            m_sentinel.m_length = 0;
@@ -45,7 +45,7 @@ class SLPool : public StoragePool {
 
 		virtual ~SLPool ()
         {
-			delete [] this->m_pool;
+			//delete [] this->m_pool;
         }
 
 		void * Allocate ( size_t bytes)
@@ -185,29 +185,6 @@ class SLPool : public StoragePool {
             return os;
 
         }
-
-        void insert_ord( Block * ptr )
-		{
-			Block * iter = &m_pool[m_n_blocks];
-
-			while(iter->m_next != nullptr)
-			{
-				if(ptr < iter->m_next){
-					ptr->m_next;
-					iter->m_next = ptr;
-					return;
-				} else {
-					iter = iter->m_next;
-				}
-			}
-
-			if(iter->m_next == nullptr)
-			{
-				iter->m_next = ptr;
-				ptr->m_next = nullptr;
-				return;
-			}
-		}
 };
 
 }

@@ -2,6 +2,7 @@
 //#include "../include/mempool_common.h"
 #include <iostream>
 #include <chrono>
+#include <cstdlib>
 
 int main ()
 {
@@ -9,7 +10,7 @@ int main ()
     int * test_ptr = nullptr;
     double tempos = 0;
 
-    std::cout << "Eficience Test - Alocating time\n\n";
+    std::cout << "Eficience Test - Alocating/Desallocating time\n\n";
 
     double medias;
 
@@ -18,7 +19,8 @@ int main ()
         for(int i = 0; i < (1000); i++)
         {
             std::chrono::steady_clock::time_point _start(std::chrono::steady_clock::now()); 
-            test_ptr = new (arena) int[1];
+            auto size = rand() % 200;
+            test_ptr = new (arena) int[size];
             delete [] test_ptr;
             std::chrono::steady_clock::time_point _end(std::chrono::steady_clock::now());
             tempos += std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(_end - _start).count(); 
@@ -28,7 +30,7 @@ int main ()
 
     }
 
-    std::cout << "Tempo total para 200 alocações no SLpool: " << medias/1000 
+    std::cout << "Tempo médio total para 1000 alocações no SLpool: " << medias/1000 
                 /*<< " / Média por alocação: " << */ << std::endl;
 
     test_ptr = nullptr;
@@ -39,8 +41,8 @@ int main ()
         for(int i = 0; i < (1000); i++)
         {
             std::chrono::steady_clock::time_point _start(std::chrono::steady_clock::now()); 
-            test_ptr = new int[1];
-            delete [] test_ptr;
+            auto size = rand() % 200;
+            test_ptr = new int[size];
             std::chrono::steady_clock::time_point _end(std::chrono::steady_clock::now());
             tempos += std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(_end - _start).count(); 
         }
@@ -49,7 +51,7 @@ int main ()
 
     }
 
-    std::cout << "Tempo total para 200 alocações no SO: " << medias/1000 
+    std::cout << "Tempo médio total para 1000 alocações no SO: " << medias/1000 
                /* << " / Média por alocação: " << medias/1000 <<*/ << std::endl;
 
     std::cout << "----------------------------------------------------------------------------------------------\n\n";
