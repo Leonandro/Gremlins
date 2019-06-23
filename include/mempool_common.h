@@ -27,7 +27,7 @@ void * operator new ( size_t bytes , StoragePool & p ) {
 }
 
 void * operator new[] ( size_t bytes, StoragePool & p ){
-    size_t new_size = bytes;
+    size_t new_size = bytes + sizeof(Tag);
     //std::cout << "New size is: " << new_size << std::endl;
     Tag * const m_tag = reinterpret_cast<Tag *const>( p.Allocate(new_size) );
     m_tag->pool = &p;
@@ -52,15 +52,20 @@ void operator delete ( void * arg ) noexcept {
         std::free( tag ); // Memory block belongs to the operational system .
 }
 
-void operator delete[] ( void * arg ) noexcept {
-// We need to subtract 1 U ( in fact , pointer arithmetics ) because arg
-// points to the raw data ( second block of information ).
-// The pool id ( tag ) is located ‘ sizeof ( Tag ) ’ bytes before .
-    Tag * const tag = reinterpret_cast < Tag * >( arg ) - 1U ;
-    if( nullptr != tag->pool ) // Memory block belongs to a particular GM .
+void operator delete[] ( void * arg ) noexcept 
+{
+    // We need to subtract 1U ( in fact , pointer arithmetics ) because arg
+    // points to the raw data ( second block of information ).
+    // The pool id ( tag ) is located ‘ sizeof ( Tag ) ’ bytes before.
+    Tag * const tag = reinterpret_cast<Tag*>( arg ) - 1U;
+    if ( nullptr != tag->pool ) // Memory block belongs to a particular GM.
+    {
         tag->pool->Free( tag );
-    else
-        std::free( tag ); // Memory block belongs to the operational system .
+    }
+    else // Memory block belongs to the operational system.
+    {
+        std::free ( tag );
+    }
 }
 
 #endif

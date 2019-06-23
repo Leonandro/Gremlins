@@ -59,7 +59,7 @@ int main( )
         std::cout << ">>> Allocating a single block with length equal to the entire pool size... ";
         std::cout << (passed ? "\e[1;35mpassed!\e[0m" : "\e[1;31mfailed!\e[0m") << std::endl;
 
-        //delete [] temp;
+        delete [] temp;
         //std::cout << "Cheguei aqui nessa bagaça\n";
     }
 
