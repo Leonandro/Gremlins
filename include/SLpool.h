@@ -24,10 +24,10 @@ class SLPool : public StoragePool {
         };
 
     public:
-        static const size_t BLK_SZ = BLK_SIZE;
-        static const size_t HEADER_SZ = sizeof(Header);
-        static const size_t TAG_SZ = sizeof(Tag);
-
+        static constexpr size_t BLK_SZ = sizeof( mp::SLPool<BLK_SIZE>::Block ); //!< The block size in bytes.
+        static constexpr size_t TAG_SZ = sizeof( Tag ); //!< The Tag size in bytes (each reserved area has a tag).
+        static constexpr size_t HEADER_SZ = sizeof( mp::SLPool<BLK_SIZE>::Header ); //!< The header size in bytes.
+    
     private:
         size_t m_n_blocks ; // ! < Number of blocks in the list .
         Block * m_pool; // ! < Head of list .
@@ -145,7 +145,7 @@ class SLPool : public StoragePool {
             int cont = 0;
             while(it != nullptr)
             {
-                for(int size = 0; size < it->m_length; size++)
+                for(size_t size = 0; size < it->m_length; size++)
                 {
                     std::cout << "\033[1;32m[FREE] \033[0m ";
                     cont++;
@@ -153,7 +153,7 @@ class SLPool : public StoragePool {
                 it = it->m_next;
             }
 
-            for(int a = 0; a < (m_n_blocks - cont); a++)
+            for(size_t a = 0; a < (m_n_blocks - cont); a++)
             {
                 std::cout << "\033[1;31m[USED] \033[0m";
             }
@@ -167,7 +167,7 @@ class SLPool : public StoragePool {
             int cont = 0;
             while(it != nullptr)
             {
-                for(int size = 0; size < it->m_length; size++)
+                for(size_t size = 0; size < it->m_length; size++)
                 {
                     os << "\033[1;32m[FREE] \033[0m ";
                     cont++;
@@ -175,7 +175,7 @@ class SLPool : public StoragePool {
                 it = it->m_next;
             }
 
-            for(int a = 0; a < (mypool.m_n_blocks - cont); a++)
+            for(size_t a = 0; a < (mypool.m_n_blocks - cont); a++)
             {
                 os << "\033[1;31m[USED] \033[0m";
             }
