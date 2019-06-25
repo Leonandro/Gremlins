@@ -203,4 +203,6 @@ int main ()
     std::cin.ignore();
     delete [] tool;
     std::cout <<  "\nApos deletar a memória apagada\n" << arena3 << std::endl;
+
+    // I gona take my horse to the old town road, ruuuuuun 'till i can't no more.
 }

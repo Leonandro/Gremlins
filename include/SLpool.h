@@ -95,6 +95,68 @@ class SLPool : public StoragePool {
             throw std::bad_alloc();
         }
 
+        /* Aloca no modelo best-fit */
+        void * BAllocate(size_t bytes)
+        {
+            Block * it = m_sentinel.m_next;
+            Block * prev = m_sentinel.m_next; 
+            size_t required_blocks = (size_t)ceil(( ((double)bytes + sizeof(Header)) / (double)BLK_SIZE));
+            bool is_first_free = true;
+            Block *best_fit = it;
+            Block *prev_best = m_sentinel.m_next;;
+
+            /* Percorre todas as áreas livres */
+            while( it != nullptr )
+	        {
+                /*Checa se a área atual tem um tamanho suficiente */
+                if (it->m_length >= required_blocks)
+                {
+                    /* Trivial */
+                    if(it->m_length == required_blocks)
+                    {
+                        if(is_first_free) m_sentinel.m_next = it->m_next;
+                        else prev->m_next = it->m_next;
+                        return reinterpret_cast<void*> (reinterpret_cast<Header *> (it) + (1U));
+                    }
+
+                    else
+                    {
+                        if(it->m_length > required_blocks && it->m_length < best_fit->m_length)
+                        {
+                            best_fit = it;   
+                        }
+                    }
+                }
+                it = it->m_next;
+                if(!is_first_free) prev = prev->m_next;
+                is_first_free = false;
+            
+            }
+
+            prev = prev_best;
+            while(prev_best != nullptr)
+            {
+                if(prev_best == best_fit) break;
+                prev = best_fit;
+                best_fit = best_fit->m_next;
+            }
+
+            prev_best = prev;
+
+            if(best_fit->m_length < required_blocks)throw std::bad_alloc();
+
+            else
+            {
+                Block * new_area =  best_fit + required_blocks;
+                if(best_fit ==  m_sentinel.m_next)m_sentinel.m_next = new_area;
+                else prev_best->m_next = new_area;
+                new_area->m_length = prev_best->m_length - required_blocks;
+                best_fit->m_length = required_blocks;
+                return reinterpret_cast<void*> ( reinterpret_cast <Header *> (best_fit) + (1U));
+            }
+            
+        }
+
         /* Desaloca da pool toda a memória associada a área apontada pelo ponteiro target_block */
         void Free ( void * target_block)
         {
@@ -187,7 +249,7 @@ class SLPool : public StoragePool {
                 it = it->m_next;
             }
 
-            for(size_t a = 0; a < (mypool.m_n_blocks - cont); a++)
+            for(size_t a = 0; a < ((mypool.m_n_blocks) - cont); a++)
             {
                 os << "\033[1;31m[USED] \033[0m";
             }
