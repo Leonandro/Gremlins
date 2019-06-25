@@ -8,6 +8,7 @@
 
 namespace mp {
 
+/* Classe filha da Storagepool que implementa uma pool personalizada para gerenciamento de memória */
 template < size_t BLK_SIZE = 16 >
 class SLPool : public StoragePool {
     public :
@@ -43,11 +44,13 @@ class SLPool : public StoragePool {
 		   m_pool[0].m_length = m_n_blocks;
 		}
 
+        /* destrutor default */
 		virtual ~SLPool ()
         {
-			//delete [] this->m_pool;
+			delete [] this->m_pool;
         }
 
+        /* Aloca o número de bytes solicitados em n blocos e retorna um ponteiro para essa área na pool */
 		void * Allocate ( size_t bytes)
         {
 			Block * it = m_sentinel.m_next;
@@ -92,6 +95,7 @@ class SLPool : public StoragePool {
             throw std::bad_alloc();
         }
 
+        /* Desaloca da pool toda a memória associada a área apontada pelo ponteiro target_block */
         void Free ( void * target_block)
         {
             target_block = reinterpret_cast<Block *> (reinterpret_cast <Header *> (target_block) - (1U));
@@ -161,15 +165,23 @@ class SLPool : public StoragePool {
             std::cout << std::endl;
         }
 
+        /* Sobrecarga do operador << */
         friend std::ostream & operator << (std::ostream & os, SLPool & mypool)
         {
             auto it = mypool.m_sentinel.m_next;
             int cont = 0;
+            bool isfirst = true;
             while(it != nullptr)
             {
                 for(size_t size = 0; size < it->m_length; size++)
                 {
-                    os << "\033[1;32m[FREE] \033[0m ";
+                    if(it != nullptr) 
+                    {    
+                        if(!isfirst)os << "\033[1;32m[FREE] \033[0m ";
+                        else os << "\033[1;36m[SEN] \033[0m ";
+
+                        isfirst = false;
+                    }
                     cont++;
                 }
                 it = it->m_next;
@@ -181,6 +193,9 @@ class SLPool : public StoragePool {
             }
 
             os << std::endl;
+
+            os << "| Block size = " << mypool.BLK_SZ << "| Number of blocks = " << mypool.m_n_blocks - 1 
+               << "| Pool size = " <<  (mypool.m_n_blocks - 1) * mypool.BLK_SZ;
 
             return os;
 
